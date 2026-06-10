@@ -5,6 +5,7 @@ export interface DensityMap {
   w: number;
   h: number;
   data: Float32Array; // 0..1 darkness per pixel
+  alpha: Float32Array; // 0..1 raw alpha, independent of sourceMode
 }
 
 export type LineStyle = "smooth" | "sharp" | "bars";
@@ -33,6 +34,7 @@ export interface RenderParams {
   transparentBg: boolean;
   blur: number; // px, applied at rasterization
   sourceMode: SourceMode;
+  clipToShape: boolean; // clip lines to the source alpha silhouette
 }
 
 export const DEFAULT_PARAMS: RenderParams = {
@@ -58,6 +60,7 @@ export const DEFAULT_PARAMS: RenderParams = {
   transparentBg: false,
   blur: 10,
   sourceMode: "luminance",
+  clipToShape: false,
 };
 
 /** Rasterize an SVG string or image data-url into a density map sized to the art area. */
@@ -100,11 +103,13 @@ export async function rasterizeSource(
 
   const { data } = ctx.getImageData(0, 0, w, h);
   const out = new Float32Array(w * h);
+  const alphaOut = new Float32Array(w * h);
   for (let i = 0; i < w * h; i++) {
     const r = data[i * 4];
     const g = data[i * 4 + 1];
     const b = data[i * 4 + 2];
     const a = data[i * 4 + 3] / 255;
+    alphaOut[i] = a;
     if (sourceMode === "alpha") {
       out[i] = a;
     } else {
@@ -112,7 +117,24 @@ export async function rasterizeSource(
       out[i] = a * (1 - lum);
     }
   }
-  return { w, h, data: out };
+  return { w, h, data: out, alpha: alphaOut };
+}
+
+function sampleAlpha(map: DensityMap, x: number, y: number): number {
+  const fx = x * (map.w - 1);
+  const fy = y * (map.h - 1);
+  if (fx < 0 || fy < 0 || fx > map.w - 1 || fy > map.h - 1) return 0;
+  const x0 = Math.floor(fx);
+  const y0 = Math.floor(fy);
+  const x1 = Math.min(x0 + 1, map.w - 1);
+  const y1 = Math.min(y0 + 1, map.h - 1);
+  const tx = fx - x0;
+  const ty = fy - y0;
+  const a = map.alpha[y0 * map.w + x0];
+  const b = map.alpha[y0 * map.w + x1];
+  const c = map.alpha[y1 * map.w + x0];
+  const d = map.alpha[y1 * map.w + x1];
+  return (a + (b - a) * tx) * (1 - ty) + (c + (d - c) * tx) * ty;
 }
 
 function sampleDensity(map: DensityMap, x: number, y: number): number {
@@ -227,6 +249,7 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
     const vals = new Float32Array(N);
     const cxs = new Float32Array(N);
     const cys = new Float32Array(N);
+    const alphaVals = p.clipToShape ? new Float32Array(N) : null;
     for (let i = 0; i < N; i++) {
       const t = tMin + i * step;
       const waveO =
@@ -239,6 +262,7 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
       cys[i] = y;
       const { u, v } = toArt(x, y);
       vals[i] = applyTone(sampleDensity(map, u, v), p);
+      if (alphaVals) alphaVals[i] = sampleAlpha(map, u, v);
     }
 
     // Moving-average smoothing
@@ -258,16 +282,41 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
       }
     }
 
+    // Smooth alpha mask (if clipToShape)
+    let alphaSm: Float32Array | null = alphaVals;
+    if (alphaVals && smoothWin > 0) {
+      alphaSm = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        let sum = 0, cnt = 0;
+        for (let k = -smoothWin; k <= smoothWin; k++) {
+          const j = i + k;
+          if (j >= 0 && j < N) { sum += alphaVals[j]; cnt++; }
+        }
+        alphaSm[i] = sum / cnt;
+      }
+    }
+
+    // Weight helper: applies alpha taper when clipToShape
+    const calcW = (i: number): number => {
+      const w = p.minWeight + (p.maxWeight - p.minWeight) * sm[i];
+      return alphaSm ? w * alphaSm[i] : w;
+    };
+
     if (p.lineStyle === "bars") {
       const seg = Math.max(2, p.dashLength + p.dashGap);
       for (let t0 = 0; t0 + p.dashLength <= tMax - tMin + seg; t0 += seg) {
         const i0 = Math.floor(t0 / step);
         const i1 = Math.min(N - 1, Math.ceil((t0 + p.dashLength) / step));
         if (i0 >= N) break;
-        let avg = 0;
-        for (let i = i0; i <= i1; i++) avg += sm[Math.min(i, N - 1)];
-        avg /= i1 - i0 + 1;
-        const w = p.minWeight + (p.maxWeight - p.minWeight) * avg;
+        let avg = 0, alphaAccum = 0;
+        const cnt = i1 - i0 + 1;
+        for (let i = i0; i <= i1; i++) {
+          avg += sm[Math.min(i, N - 1)];
+          if (alphaSm) alphaAccum += alphaSm[Math.min(i, N - 1)];
+        }
+        avg /= cnt;
+        const avgAlpha = alphaSm ? alphaAccum / cnt : 1;
+        const w = (p.minWeight + (p.maxWeight - p.minWeight) * avg) * avgAlpha;
         if (w < 0.15) continue;
         const hw = w / 2;
         const a0 = Math.min(i0, N - 1);
@@ -294,7 +343,7 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
       const top: Pt[] = [];
       const bot: Pt[] = [];
       for (let i = a; i <= b; i++) {
-        const w = p.minWeight + (p.maxWeight - p.minWeight) * sm[i];
+        const w = calcW(i);
         const hw = Math.max(0.05, w / 2);
         top.push({ x: cxs[i] + nx * hw, y: cys[i] + ny * hw });
         bot.push({ x: cxs[i] - nx * hw, y: cys[i] - ny * hw });
@@ -303,7 +352,7 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
       paths.push(p.lineStyle === "smooth" ? smoothClosedPath(ring) : sharpClosedPath(ring));
     };
     for (let i = 0; i < N; i++) {
-      const w = p.minWeight + (p.maxWeight - p.minWeight) * sm[i];
+      const w = calcW(i);
       if (w >= EPS) {
         if (segStart < 0) segStart = i;
       } else if (segStart >= 0) {

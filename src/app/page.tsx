@@ -255,6 +255,18 @@ export default function Home() {
               onChange={(v) => set("sourceMode", v)}
             />
             <Toggle label="Invert" value={params.invert} onChange={(v) => set("invert", v)} />
+            <Toggle
+              label="Clip to shape"
+              value={params.clipToShape}
+              onChange={(v) => set("clipToShape", v)}
+            />
+            {params.clipToShape && (
+              <p className="text-[10px] leading-relaxed text-white/35">
+                Lines are clipped to the source silhouette (alpha channel). Use{" "}
+                <span className="text-white/55">Alpha</span> mode above for solid logos.
+                Increase <span className="text-white/55">Feather</span> to taper edges.
+              </p>
+            )}
           </Section>
 
           <Section title="Distortion">
