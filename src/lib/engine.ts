@@ -9,6 +9,7 @@ export interface DensityMap {
 }
 
 export type LineStyle = "smooth" | "sharp" | "bars";
+export type StepStyle = "sharp" | "round";
 export type SourceMode = "luminance" | "alpha";
 
 export interface RenderParams {
@@ -36,6 +37,8 @@ export interface RenderParams {
   sourceMode: SourceMode;
   clipToShape: boolean; // clip lines to the source alpha silhouette
   alphaFalloff: number; // 0..1, feathers line weight at alpha edges (alpha mode only)
+  stepCount: number; // 0 = continuous, 2..N = quantize weight into N steps
+  stepStyle: StepStyle; // how step transitions look: sharp corners or round caps
   skewX: number; // degrees
   skewY: number; // degrees
 }
@@ -65,6 +68,8 @@ export const DEFAULT_PARAMS: RenderParams = {
   sourceMode: "luminance",
   clipToShape: false,
   alphaFalloff: 0,
+  stepCount: 0,
+  stepStyle: "sharp",
   skewX: 0,
   skewY: 0,
 };
@@ -343,6 +348,67 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
             { x: x0 - nx * hw, y: y0 - ny * hw },
           ])
         );
+      }
+      continue;
+    }
+
+    // Stepped mode: quantize weights into discrete levels, emit per-run constant-width paths
+    if (p.stepCount >= 2) {
+      const n = p.stepCount;
+      // Build quantized weight array
+      const qw = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        const w = calcW(i);
+        if (w < 0.12) { qw[i] = 0; continue; }
+        const bucket = Math.round((w - p.minWeight) / (p.maxWeight - p.minWeight) * (n - 1));
+        const clamped = Math.max(0, Math.min(n - 1, bucket));
+        qw[i] = p.minWeight + (clamped / (n - 1)) * (p.maxWeight - p.minWeight);
+      }
+      // Collect run boundaries; extend each run one sample into its neighbor so they overlap
+      // and antialiasing between adjacent filled paths leaves no visible seam.
+      interface StepRun { x0: number; y0: number; x1: number; y1: number; hw: number }
+      const runs: StepRun[] = [];
+      let ri = 0;
+      while (ri < N) {
+        const level = qw[ri];
+        if (level < 0.12) { ri++; continue; }
+        let rj = ri;
+        while (rj + 1 < N && qw[rj + 1] === level) rj++;
+        // Extend into neighbor by one full sample so runs overlap and antialiasing seams vanish
+        const prevEnd = ri > 0 ? ri - 1 : ri;
+        const nextStart = rj < N - 1 ? rj + 1 : rj;
+        const sx = cxs[prevEnd];
+        const sy = cys[prevEnd];
+        const ex = cxs[nextStart];
+        const ey = cys[nextStart];
+        runs.push({ x0: sx, y0: sy, x1: ex, y1: ey, hw: Math.max(0.05, level / 2) });
+        ri = rj + 1;
+      }
+      for (const run of runs) {
+        const { x0, y0, x1, y1, hw } = run;
+        if (p.stepStyle === "round") {
+          const r = hw.toFixed(2);
+          paths.push(
+            // top-left → top-right (along +normal side)
+            `M${(x0 + nx * hw).toFixed(2)},${(y0 + ny * hw).toFixed(2)}` +
+            `L${(x1 + nx * hw).toFixed(2)},${(y1 + ny * hw).toFixed(2)}` +
+            // right end cap: arc from top-right → bottom-right, bulging outward (sweep=0)
+            `A${r},${r} 0 0 0 ${(x1 - nx * hw).toFixed(2)},${(y1 - ny * hw).toFixed(2)}` +
+            // bottom-right → bottom-left (along -normal side)
+            `L${(x0 - nx * hw).toFixed(2)},${(y0 - ny * hw).toFixed(2)}` +
+            // left end cap: arc from bottom-left → top-left, bulging outward (sweep=0)
+            `A${r},${r} 0 0 0 ${(x0 + nx * hw).toFixed(2)},${(y0 + ny * hw).toFixed(2)}Z`
+          );
+        } else {
+          paths.push(
+            sharpClosedPath([
+              { x: x0 + nx * hw, y: y0 + ny * hw },
+              { x: x1 + nx * hw, y: y1 + ny * hw },
+              { x: x1 - nx * hw, y: y1 - ny * hw },
+              { x: x0 - nx * hw, y: y0 - ny * hw },
+            ])
+          );
+        }
       }
       continue;
     }

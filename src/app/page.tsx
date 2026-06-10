@@ -8,6 +8,7 @@ import {
   rasterizeSource,
   type DensityMap,
   type RenderParams,
+  type StepStyle,
 } from "@/lib/engine";
 import { PRESETS, SAMPLES } from "@/lib/presets";
 import { ColorPicker } from "@/components/ColorPicker";
@@ -281,6 +282,25 @@ export default function Home() {
                 <Slider label="Bar length" value={params.dashLength} min={2} max={140} unit="px" onChange={(v) => set("dashLength", v)} />
                 <Slider label="Bar gap" value={params.dashGap} min={0} max={80} unit="px" onChange={(v) => set("dashGap", v)} />
               </>
+            )}
+            <Slider
+              label="Thickness steps"
+              value={params.stepCount}
+              min={0}
+              max={12}
+              step={1}
+              onChange={(v) => set("stepCount", v)}
+            />
+            {params.stepCount >= 2 && (
+              <SegmentedControl
+                label="Step corners"
+                value={params.stepStyle}
+                options={[
+                  { value: "sharp" as StepStyle, label: "Sharp" },
+                  { value: "round" as StepStyle, label: "Round" },
+                ]}
+                onChange={(v) => set("stepStyle", v)}
+              />
             )}
           </Section>
 
