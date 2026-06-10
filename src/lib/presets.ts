@@ -1,0 +1,151 @@
+import type { RenderParams } from "./engine";
+
+export interface Preset {
+  name: string;
+  desc: string;
+  params: Partial<RenderParams>;
+}
+
+export const PRESETS: Preset[] = [
+  {
+    name: "Klein Waves",
+    desc: "Bold blue ridgelines",
+    params: {
+      angle: 0,
+      spacing: 52,
+      minWeight: 5,
+      maxWeight: 42,
+      blur: 26,
+      contrast: 2.6,
+      smoothing: 26,
+      lineStyle: "smooth",
+      waveAmplitude: 0,
+      lineColor: "#1722f2",
+      bgColor: "#fafaf7",
+      invert: false,
+    },
+  },
+  {
+    name: "Blinds",
+    desc: "Dense editorial stripes",
+    params: {
+      angle: 0,
+      spacing: 24,
+      minWeight: 11,
+      maxWeight: 23,
+      blur: 6,
+      contrast: 3.2,
+      smoothing: 8,
+      lineStyle: "smooth",
+      waveAmplitude: 0,
+      lineColor: "#0c0c0c",
+      bgColor: "#ffffff",
+      invert: false,
+    },
+  },
+  {
+    name: "Barcode",
+    desc: "Segmented vertical bars",
+    params: {
+      angle: 90,
+      spacing: 30,
+      minWeight: 5,
+      maxWeight: 26,
+      blur: 4,
+      contrast: 2.2,
+      smoothing: 4,
+      lineStyle: "bars",
+      dashLength: 44,
+      dashGap: 16,
+      waveAmplitude: 0,
+      lineColor: "#ffa1e0",
+      bgColor: "#4f16f0",
+      invert: false,
+    },
+  },
+  {
+    name: "Speedlines",
+    desc: "Thin kinetic streaks",
+    params: {
+      angle: 0,
+      spacing: 12,
+      minWeight: 0,
+      maxWeight: 5,
+      blur: 8,
+      contrast: 1.4,
+      smoothing: 10,
+      lineStyle: "smooth",
+      waveAmplitude: 0,
+      lineColor: "#181818",
+      bgColor: "#eceae4",
+      invert: false,
+    },
+  },
+  {
+    name: "Op Art",
+    desc: "Warped optical field",
+    params: {
+      angle: 28,
+      spacing: 16,
+      minWeight: 2,
+      maxWeight: 15,
+      blur: 5,
+      contrast: 3.5,
+      smoothing: 5,
+      lineStyle: "smooth",
+      waveAmplitude: 26,
+      waveFrequency: 1.6,
+      wavePhase: 0.05,
+      lineColor: "#000000",
+      bgColor: "#ffffff",
+      invert: false,
+    },
+  },
+  {
+    name: "Heatwave",
+    desc: "Soft tonal gradient lines",
+    params: {
+      angle: 0,
+      spacing: 18,
+      minWeight: 1,
+      maxWeight: 14,
+      blur: 18,
+      contrast: 1.2,
+      smoothing: 16,
+      lineStyle: "smooth",
+      waveAmplitude: 8,
+      waveFrequency: 3,
+      wavePhase: 0.18,
+      lineColor: "#ff4d00",
+      bgColor: "#16100b",
+      invert: false,
+    },
+  },
+];
+
+export const SAMPLES: { name: string; svg: string }[] = [
+  {
+    name: "Circle",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="78" fill="black"/></svg>`,
+  },
+  {
+    name: "Peaks",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M0 200 L55 60 L95 140 L135 30 L175 120 L200 80 L200 200 Z" fill="black"/></svg>`,
+  },
+  {
+    name: "Star",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M100 8 L124 72 L192 74 L138 116 L158 182 L100 142 L42 182 L62 116 L8 74 L76 72 Z" fill="black"/></svg>`,
+  },
+  {
+    name: "Blob",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M48 36 C90 4 156 18 174 62 C192 106 168 140 140 162 C112 184 56 188 34 150 C12 112 6 68 48 36 Z" fill="black"/></svg>`,
+  },
+  {
+    name: "Type",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><text x="100" y="148" font-family="Helvetica, Arial, sans-serif" font-size="160" font-weight="900" text-anchor="middle" fill="black">A</text></svg>`,
+  },
+  {
+    name: "Rings",
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><g fill="none" stroke="black"><circle cx="100" cy="100" r="30" stroke-width="22"/><circle cx="100" cy="100" r="72" stroke-width="16"/></g></svg>`,
+  },
+];
