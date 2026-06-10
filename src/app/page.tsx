@@ -155,8 +155,51 @@ export default function Home() {
       </header>
 
       <div className="flex min-h-0 flex-1">
+        {/* Preview */}
+        <main className="preview-grid relative flex min-w-0 flex-1 items-center justify-center overflow-hidden p-8">
+          <div
+            className="relative max-h-full max-w-full shadow-2xl shadow-black/50"
+            style={{ aspectRatio: `${params.width} / ${params.height}` }}
+          >
+            <svg
+              width={params.width}
+              height={params.height}
+              viewBox={`0 0 ${params.width} ${params.height}`}
+              className="block h-auto max-h-[calc(100vh-8.5rem)] w-auto max-w-full"
+              style={{ background: params.transparentBg ? "transparent" : params.bgColor }}
+            >
+              {params.transparentBg && (
+                <pattern id="checker" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <rect width="24" height="24" fill="#2a2a2e" />
+                  <rect width="12" height="12" fill="#222226" />
+                  <rect x="12" y="12" width="12" height="12" fill="#222226" />
+                </pattern>
+              )}
+              {params.transparentBg && (
+                <rect width={params.width} height={params.height} fill="url(#checker)" />
+              )}
+              <g
+                fill={params.lineColor}
+                transform={params.skewX !== 0 || params.skewY !== 0 ? `skewX(${params.skewX}) skewY(${params.skewY})` : undefined}
+              >
+                {paths.map((d, i) => (
+                  <path key={i} d={d} />
+                ))}
+              </g>
+            </svg>
+          </div>
+
+          {dragOver && (
+            <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#1722f2]/20 backdrop-blur-sm">
+              <p className="rounded-lg border-2 border-dashed border-white/60 px-8 py-5 font-display text-sm uppercase tracking-[0.2em]">
+                Drop SVG or image
+              </p>
+            </div>
+          )}
+        </main>
+
         {/* Sidebar */}
-        <aside className="flex w-72 shrink-0 flex-col overflow-y-auto border-r border-white/8 bg-[#121214]">
+        <aside className="flex w-72 shrink-0 flex-col overflow-y-auto border-l border-white/8 bg-[#121214]">
           <Section title="Source">
             <div className="flex gap-2">
               <button
@@ -273,6 +316,8 @@ export default function Home() {
             <Slider label="Wave amplitude" value={params.waveAmplitude} min={0} max={80} unit="px" onChange={(v) => set("waveAmplitude", v)} />
             <Slider label="Wave frequency" value={params.waveFrequency} min={0.2} max={10} step={0.1} onChange={(v) => set("waveFrequency", v)} />
             <Slider label="Phase shift" value={params.wavePhase} min={0} max={0.5} step={0.01} onChange={(v) => set("wavePhase", v)} />
+            <Slider label="Skew X" value={params.skewX} min={-45} max={45} unit="°" onChange={(v) => set("skewX", v)} />
+            <Slider label="Skew Y" value={params.skewY} min={-45} max={45} unit="°" onChange={(v) => set("skewY", v)} />
           </Section>
 
           <Section title="Color">
@@ -334,46 +379,6 @@ export default function Home() {
             </button>
           </div>
         </aside>
-
-        {/* Preview */}
-        <main className="preview-grid relative flex min-w-0 flex-1 items-center justify-center overflow-hidden p-8">
-          <div
-            className="relative max-h-full max-w-full shadow-2xl shadow-black/50"
-            style={{ aspectRatio: `${params.width} / ${params.height}` }}
-          >
-            <svg
-              width={params.width}
-              height={params.height}
-              viewBox={`0 0 ${params.width} ${params.height}`}
-              className="block h-auto max-h-[calc(100vh-8.5rem)] w-auto max-w-full"
-              style={{ background: params.transparentBg ? "transparent" : params.bgColor }}
-            >
-              {params.transparentBg && (
-                <pattern id="checker" width="24" height="24" patternUnits="userSpaceOnUse">
-                  <rect width="24" height="24" fill="#2a2a2e" />
-                  <rect width="12" height="12" fill="#222226" />
-                  <rect x="12" y="12" width="12" height="12" fill="#222226" />
-                </pattern>
-              )}
-              {params.transparentBg && (
-                <rect width={params.width} height={params.height} fill="url(#checker)" />
-              )}
-              <g fill={params.lineColor}>
-                {paths.map((d, i) => (
-                  <path key={i} d={d} />
-                ))}
-              </g>
-            </svg>
-          </div>
-
-          {dragOver && (
-            <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#1722f2]/20 backdrop-blur-sm">
-              <p className="rounded-lg border-2 border-dashed border-white/60 px-8 py-5 font-display text-sm uppercase tracking-[0.2em]">
-                Drop SVG or image
-              </p>
-            </div>
-          )}
-        </main>
       </div>
     </div>
   );

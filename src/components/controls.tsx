@@ -116,9 +116,9 @@ export function Toggle({
         }`}
       >
         <span
-          className="absolute top-0.5 h-3.5 w-3.5 rounded-full bg-white transition-transform duration-200"
+          className="absolute left-0 top-0.5 h-3.5 w-3.5 rounded-full bg-white transition-transform duration-200"
           style={{
-            transform: value ? "translateX(15px)" : "translateX(2px)",
+            transform: value ? "translateX(17px)" : "translateX(1px)",
             transitionTimingFunction: "cubic-bezier(.215,.61,.355,1)",
           }}
         />

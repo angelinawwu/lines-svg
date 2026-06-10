@@ -35,6 +35,8 @@ export interface RenderParams {
   blur: number; // px, applied at rasterization
   sourceMode: SourceMode;
   clipToShape: boolean; // clip lines to the source alpha silhouette
+  skewX: number; // degrees
+  skewY: number; // degrees
 }
 
 export const DEFAULT_PARAMS: RenderParams = {
@@ -61,6 +63,8 @@ export const DEFAULT_PARAMS: RenderParams = {
   blur: 10,
   sourceMode: "luminance",
   clipToShape: false,
+  skewX: 0,
+  skewY: 0,
 };
 
 /** Rasterize an SVG string or image data-url into a density map sized to the art area. */
@@ -372,10 +376,14 @@ export function buildSvg(paths: string[], p: RenderParams): string {
     ? ""
     : `<rect width="${p.width}" height="${p.height}" fill="${p.bgColor}"/>`;
   const body = paths.map((d) => `<path d="${d}"/>`).join("");
+  const skewTransform =
+    p.skewX !== 0 || p.skewY !== 0
+      ? ` transform="skewX(${p.skewX}) skewY(${p.skewY})"`
+      : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${p.width} ${p.height}" width="${p.width}" height="${p.height}">` +
     bg +
-    `<g fill="${p.lineColor}">${body}</g>` +
+    `<g fill="${p.lineColor}"${skewTransform}>${body}</g>` +
     `</svg>`
   );
 }
