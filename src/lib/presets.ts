@@ -8,6 +8,37 @@ export interface Preset {
 
 export const PRESETS: Preset[] = [
   {
+    name: "Default",
+    desc: "Balanced starting point",
+    params: {
+      spacing: 26,
+      angle: 0,
+      minWeight: 3,
+      maxWeight: 20,
+      contrast: 1.6,
+      brightness: 0,
+      invert: false,
+      smoothing: 14,
+      lineStyle: "smooth",
+      dashLength: 18,
+      dashGap: 10,
+      waveAmplitude: 0,
+      waveFrequency: 2,
+      wavePhase: 0.12,
+      lineColor: "#111111",
+      bgColor: "#ffffff",
+      transparentBg: false,
+      blur: 10,
+      sourceMode: "luminance",
+      clipToShape: false,
+      alphaFalloff: 0,
+      stepCount: 0,
+      stepStyle: "sharp",
+      skewX: 0,
+      skewY: 0,
+    },
+  },
+  {
     name: "Klein Waves",
     desc: "Bold blue ridgelines",
     params: {
@@ -22,26 +53,6 @@ export const PRESETS: Preset[] = [
       waveAmplitude: 0,
       lineColor: "#1722f2",
       bgColor: "#fafaf7",
-      invert: false,
-      skewX: 0,
-      skewY: 0,
-    },
-  },
-  {
-    name: "Blinds",
-    desc: "Dense editorial stripes",
-    params: {
-      angle: 0,
-      spacing: 24,
-      minWeight: 11,
-      maxWeight: 23,
-      blur: 6,
-      contrast: 3.2,
-      smoothing: 8,
-      lineStyle: "smooth",
-      waveAmplitude: 0,
-      lineColor: "#0c0c0c",
-      bgColor: "#ffffff",
       invert: false,
       skewX: 0,
       skewY: 0,
@@ -134,7 +145,7 @@ export const PRESETS: Preset[] = [
     },
   },
   {
-    name: "Alpha Steps",
+    name: "VEST v1",
     desc: "Stepped silhouette, clipped alpha",
     params: {
       angle: 0,
@@ -164,7 +175,7 @@ export const PRESETS: Preset[] = [
     },
   },
   {
-    name: "Alpha Cut",
+    name: "VEST v2",
     desc: "Sharp silhouette from alpha",
     params: {
       angle: 0,

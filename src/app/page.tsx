@@ -36,14 +36,14 @@ export default function Home() {
   });
   const [density, setDensity] = useState<DensityMap | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const [activePreset, setActivePreset] = useState<string | null>("Klein Waves");
+  const [activePreset, setActivePreset] = useState<string | null>("Default");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const set = useCallback(<K extends keyof RenderParams>(key: K, value: RenderParams[K]) => {
     setParams((p) => ({ ...p, [key]: value }));
   }, []);
 
-  // initialize with the first preset
+  // initialize with the Default preset
   useEffect(() => {
     setParams((p) => ({ ...p, ...PRESETS[0].params }));
   }, []);
@@ -400,21 +400,6 @@ export default function Home() {
             />
           </Section>
 
-          <div className="px-4 py-4">
-            <button
-              onClick={() => {
-                setActivePreset(null);
-                setParams((p) => ({
-                  ...DEFAULT_PARAMS,
-                  width: p.width,
-                  height: p.height,
-                }));
-              }}
-              className="w-full rounded-md border border-white/10 py-2 text-[11px] text-white/45 transition-colors duration-200 ease hover:border-white/25 hover:text-white/80"
-            >
-              Reset all settings
-            </button>
-          </div>
         </aside>
       </div>
     </div>
