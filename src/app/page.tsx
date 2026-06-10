@@ -330,6 +330,8 @@ export default function Home() {
             style={{ aspectRatio: `${params.width} / ${params.height}` }}
           >
             <svg
+              width={params.width}
+              height={params.height}
               viewBox={`0 0 ${params.width} ${params.height}`}
               className="block h-auto max-h-[calc(100vh-8.5rem)] w-auto max-w-full"
               style={{ background: params.transparentBg ? "transparent" : params.bgColor }}
