@@ -35,6 +35,7 @@ export interface RenderParams {
   blur: number; // px, applied at rasterization
   sourceMode: SourceMode;
   clipToShape: boolean; // clip lines to the source alpha silhouette
+  alphaFalloff: number; // 0..1, feathers line weight at alpha edges (alpha mode only)
   skewX: number; // degrees
   skewY: number; // degrees
 }
@@ -63,6 +64,7 @@ export const DEFAULT_PARAMS: RenderParams = {
   blur: 10,
   sourceMode: "luminance",
   clipToShape: false,
+  alphaFalloff: 0,
   skewX: 0,
   skewY: 0,
 };
@@ -253,7 +255,7 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
     const vals = new Float32Array(N);
     const cxs = new Float32Array(N);
     const cys = new Float32Array(N);
-    const alphaVals = p.clipToShape ? new Float32Array(N) : null;
+    const alphaVals = (p.clipToShape || (p.alphaFalloff > 0 && p.sourceMode === "alpha")) ? new Float32Array(N) : null;
     for (let i = 0; i < N; i++) {
       const t = tMin + i * step;
       const waveO =
@@ -300,10 +302,16 @@ export function generatePaths(map: DensityMap, p: RenderParams): string[] {
       }
     }
 
-    // Weight helper: applies alpha taper when clipToShape
+    // Weight helper: applies alpha taper when clipToShape or alphaFalloff
     const calcW = (i: number): number => {
       const w = p.minWeight + (p.maxWeight - p.minWeight) * sm[i];
-      return alphaSm ? w * alphaSm[i] : w;
+      if (p.clipToShape && alphaSm) return w * alphaSm[i];
+      if (p.alphaFalloff > 0 && p.sourceMode === "alpha" && alphaSm) {
+        const a = alphaSm[i];
+        const tapered = Math.pow(Math.min(1, a / Math.max(0.001, p.alphaFalloff)), 1.5);
+        return w * tapered;
+      }
+      return w;
     };
 
     if (p.lineStyle === "bars") {

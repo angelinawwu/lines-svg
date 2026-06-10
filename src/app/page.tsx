@@ -297,6 +297,16 @@ export default function Home() {
               ]}
               onChange={(v) => set("sourceMode", v)}
             />
+            {params.sourceMode === "alpha" && (
+              <Slider
+                label="Falloff"
+                value={params.alphaFalloff}
+                min={0}
+                max={1}
+                step={0.01}
+                onChange={(v) => set("alphaFalloff", v)}
+              />
+            )}
             <Toggle label="Invert" value={params.invert} onChange={(v) => set("invert", v)} />
             <Toggle
               label="Clip to shape"

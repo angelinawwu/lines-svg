@@ -121,6 +121,33 @@ export const PRESETS: Preset[] = [
       invert: false,
     },
   },
+  {
+    name: "Alpha Cut",
+    desc: "Sharp silhouette from alpha",
+    params: {
+      angle: 0,
+      spacing: 19,
+      minWeight: 0,
+      maxWeight: 9.5,
+      smoothing: 0,
+      lineStyle: "smooth",
+      contrast: 5,
+      brightness: 0,
+      blur: 12,
+      sourceMode: "alpha",
+      invert: false,
+      clipToShape: false,
+      waveAmplitude: 0,
+      waveFrequency: 0.2,
+      wavePhase: 0,
+      skewX: 10,
+      skewY: 0,
+      lineColor: "#ffffff",
+      bgColor: "#fafaf7",
+      transparentBg: true,
+      margin: 120,
+    },
+  },
 ];
 
 export const SAMPLES: { name: string; svg: string }[] = [
