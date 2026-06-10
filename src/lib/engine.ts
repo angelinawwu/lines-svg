@@ -450,9 +450,11 @@ export function buildSvg(paths: string[], p: RenderParams): string {
     ? ""
     : `<rect width="${p.width}" height="${p.height}" fill="${p.bgColor}"/>`;
   const body = paths.map((d) => `<path d="${d}"/>`).join("");
+  const cx = p.width / 2;
+  const cy = p.height / 2;
   const skewTransform =
     p.skewX !== 0 || p.skewY !== 0
-      ? ` transform="skewX(${p.skewX}) skewY(${p.skewY})"`
+      ? ` transform="translate(${cx},${cy}) skewX(${p.skewX}) skewY(${p.skewY}) translate(-${cx},-${cy})"`
       : "";
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${p.width} ${p.height}" width="${p.width}" height="${p.height}">` +

@@ -188,7 +188,7 @@ export default function Home() {
               )}
               <g
                 fill={params.lineColor}
-                transform={params.skewX !== 0 || params.skewY !== 0 ? `skewX(${params.skewX}) skewY(${params.skewY})` : undefined}
+                transform={params.skewX !== 0 || params.skewY !== 0 ? `translate(${params.width / 2},${params.height / 2}) skewX(${params.skewX}) skewY(${params.skewY}) translate(-${params.width / 2},-${params.height / 2})` : undefined}
               >
                 {paths.map((d, i) => (
                   <path key={i} d={d} />
