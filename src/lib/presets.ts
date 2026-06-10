@@ -23,6 +23,8 @@ export const PRESETS: Preset[] = [
       lineColor: "#1722f2",
       bgColor: "#fafaf7",
       invert: false,
+      skewX: 0,
+      skewY: 0,
     },
   },
   {
@@ -41,6 +43,8 @@ export const PRESETS: Preset[] = [
       lineColor: "#0c0c0c",
       bgColor: "#ffffff",
       invert: false,
+      skewX: 0,
+      skewY: 0,
     },
   },
   {
@@ -61,6 +65,8 @@ export const PRESETS: Preset[] = [
       lineColor: "#ffa1e0",
       bgColor: "#4f16f0",
       invert: false,
+      skewX: 0,
+      skewY: 0,
     },
   },
   {
@@ -79,6 +85,8 @@ export const PRESETS: Preset[] = [
       lineColor: "#181818",
       bgColor: "#eceae4",
       invert: false,
+      skewX: 0,
+      skewY: 0,
     },
   },
   {
@@ -99,6 +107,8 @@ export const PRESETS: Preset[] = [
       lineColor: "#000000",
       bgColor: "#ffffff",
       invert: false,
+      skewX: 0,
+      skewY: 0,
     },
   },
   {
@@ -119,6 +129,8 @@ export const PRESETS: Preset[] = [
       lineColor: "#ff4d00",
       bgColor: "#16100b",
       invert: false,
+      skewX: 0,
+      skewY: 0,
     },
   },
   {

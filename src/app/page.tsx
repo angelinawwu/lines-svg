@@ -75,14 +75,19 @@ export default function Home() {
 
   const loadFile = useCallback((file: File) => {
     if (file.type === "image/svg+xml" || file.name.endsWith(".svg")) {
-      file.text().then((text) => setSource({ data: text, isSvg: true, name: file.name }));
+      file.text().then((text) => {
+        setSource({ data: text, isSvg: true, name: file.name });
+        set("sourceMode", "alpha");
+      });
     } else if (file.type.startsWith("image/")) {
       const reader = new FileReader();
-      reader.onload = () =>
+      reader.onload = () => {
         setSource({ data: reader.result as string, isSvg: false, name: file.name });
+        set("sourceMode", "luminance");
+      };
       reader.readAsDataURL(file);
     }
-  }, []);
+  }, [set]);
 
   // Global paste: accept SVG markup or image files
   useEffect(() => {
@@ -101,11 +106,12 @@ export default function Home() {
       const text = e.clipboardData?.getData("text/plain")?.trim();
       if (text && text.startsWith("<svg")) {
         setSource({ data: text, isSvg: true, name: "Pasted SVG" });
+        set("sourceMode", "alpha");
       }
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [loadFile]);
+  }, [loadFile, set]);
 
   const applyPreset = (name: string) => {
     const preset = PRESETS.find((p) => p.name === name);
@@ -156,9 +162,9 @@ export default function Home() {
         </div>
       </header>
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 flex-col md:flex-row overflow-hidden">
         {/* Preview */}
-        <main className="preview-grid relative flex min-w-0 flex-1 items-center justify-center overflow-hidden p-8">
+        <main className="preview-grid relative flex min-w-0 shrink-0 items-center justify-center overflow-hidden p-6 h-[40vh] md:h-auto md:flex-1">
           <div
             className="relative max-h-full max-w-full shadow-2xl shadow-black/50"
             style={{ aspectRatio: `${params.width} / ${params.height}` }}
@@ -167,7 +173,7 @@ export default function Home() {
               width={params.width}
               height={params.height}
               viewBox={`0 0 ${params.width} ${params.height}`}
-              className="block h-auto max-h-[calc(100vh-8.5rem)] w-auto max-w-full"
+              className="block h-auto max-h-full w-auto max-w-full"
               style={{ background: params.transparentBg ? "transparent" : params.bgColor }}
             >
               {params.transparentBg && (
@@ -201,7 +207,7 @@ export default function Home() {
         </main>
 
         {/* Sidebar */}
-        <aside className="flex w-72 shrink-0 flex-col overflow-y-auto border-l border-white/8 bg-[#121214]">
+        <aside className="flex w-full min-h-0 flex-1 shrink-0 flex-col overflow-y-auto border-t border-white/8 bg-[#121214] md:w-72 md:flex-none md:border-l md:border-t-0">
           <Section title="Source">
             <div className="flex gap-2">
               <button
