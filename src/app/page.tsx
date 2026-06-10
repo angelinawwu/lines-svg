@@ -151,6 +151,7 @@ export default function Home() {
             width={params.width}
             height={params.height}
             bgColor={params.bgColor}
+            transparentBg={params.transparentBg}
           />
         </div>
       </header>

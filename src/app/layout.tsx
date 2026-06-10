@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   title: "Lineform — SVG to line art",
   description:
     "Turn any SVG or image into vector line art with variable line weights, full customization, and multi-format export.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -15,6 +15,7 @@ interface Props {
   width: number;
   height: number;
   bgColor: string;
+  transparentBg: boolean;
 }
 
 type Status = { msg: string; kind: "ok" | "err" } | null;
@@ -26,7 +27,7 @@ const FORMATS: { key: "svg" | RasterFormat; label: string; ext: string }[] = [
   { key: "webp", label: "WebP", ext: "webp" },
 ];
 
-export function ExportMenu({ getSvg, width, height, bgColor }: Props) {
+export function ExportMenu({ getSvg, width, height, bgColor, transparentBg }: Props) {
   const [open, setOpen] = useState(false);
   const [scale, setScale] = useState(2);
   const [status, setStatus] = useState<Status>(null);
@@ -68,7 +69,7 @@ export function ExportMenu({ getSvg, width, height, bgColor }: Props) {
         if (key === "svg") {
           downloadSvg(svg, `lineart.${ext}`);
         } else {
-          const blob = await rasterBlob(svg, width, height, scale, key, bgColor);
+          const blob = await rasterBlob(svg, width, height, scale, key, transparentBg ? undefined : bgColor);
           downloadBlob(blob, `lineart.${ext}`);
         }
       },
@@ -83,7 +84,7 @@ export function ExportMenu({ getSvg, width, height, bgColor }: Props) {
         if (key === "svg") {
           await copyText(svg);
         } else {
-          const blob = await rasterBlob(svg, width, height, scale, key, bgColor);
+          const blob = await rasterBlob(svg, width, height, scale, key, transparentBg ? undefined : bgColor);
           const result = await copyImageBlob(blob);
           if (result === "converted-png" && key !== "png") {
             setStatus({ msg: "Copied as PNG (browser limit)", kind: "ok" });
